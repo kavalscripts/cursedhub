@@ -115,25 +115,28 @@ local pingLaggerSetVisual = nil
 local pingLaggerRemote = nil
 
 task.spawn(function()
-	local BLACKLIST_URL="https://pastebin.com/2zLUXv2K"
-	pcall(function() HS.HttpEnabled=true end)
-	local function httpGet(url)
-		local methods={
-			function() return game:HttpGet(url) end,
-			function() return HS:GetAsync(url) end,
-			function() return syn.request({Url=url,Method="GET"}).Body end,
-			function() return http_request({Url=url,Method="GET"}).Body end,
-			function() return request({Url=url,Method="GET"}).Body end
-		}
-		for _,method in ipairs(methods) do
-			local ok,result=pcall(method)
-			if ok and result then return result end
-		end
-		return nil
+	local BLACKLIST_URL = "https://pastebin.com/2zLUXv2K"
+	local function safeHttpGet(url)
+		local res = nil
+		pcall(function()
+			if type(game.HttpGet) == "function" then
+				res = game:HttpGet(url)
+			elseif type(game.HttpGetAsync) == "function" then
+				res = game:HttpGetAsync(url)
+			elseif type(http_request) == "function" then
+				local r = http_request({Url = url, Method = "GET"})
+				if r and r.Body then res = r.Body end
+			elseif type(request) == "function" then
+				local r = request({Url = url, Method = "GET"})
+				if r and r.Body then res = r.Body end
+			end
+		end)
+		return res
 	end
+
 	while task.wait(5) do
 		pcall(function()
-			local response = httpGet(BLACKLIST_URL)
+			local response = safeHttpGet(BLACKLIST_URL)
 			if response and type(response) == "string" and string.find(response, tostring(LP.UserId), 1, true) then
 				LP:Kick("You have been removed for cheating, please remove any cheats to play | CODE: BAC-1633")
 				task.wait(999999)
