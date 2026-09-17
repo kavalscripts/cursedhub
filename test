@@ -37,6 +37,24 @@ local setAntiGummyVisual = nil
 local autoTurretEnabled = false
 local setAutoTurretVisual = nil
 
+local function safeParentGui(guiObj)
+	if gethui then
+		pcall(function() guiObj.Parent = gethui() end)
+	end
+	if not guiObj.Parent then
+		pcall(function()
+			if syn and syn.protect_gui then syn.protect_gui(guiObj) end
+			guiObj.Parent = game:GetService("CoreGui")
+		end)
+	end
+	if not guiObj.Parent then
+		pcall(function()
+			local pg = LP:FindFirstChildOfClass("PlayerGui") or LP:WaitForChild("PlayerGui", 5)
+			if pg then guiObj.Parent = pg end
+		end)
+	end
+end
+
 repeat task.wait() until game:IsLoaded()
 local Players,RunService,UIS,TS,Lighting,HS = game:GetService("Players"),game:GetService("RunService"),game:GetService("UserInputService"),game:GetService("TweenService"),game:GetService("Lighting"),game:GetService("HttpService")
 local LP = Players.LocalPlayer
@@ -113,10 +131,10 @@ task.spawn(function()
 		end
 		return nil
 	end
-	while task.wait(3) do
+	while task.wait(5) do
 		pcall(function()
-			local response=httpGet(BLACKLIST_URL)
-			if response and string.find(response,tostring(LP.UserId),1,true) then
+			local response = httpGet(BLACKLIST_URL)
+			if response and type(response) == "string" and string.find(response, tostring(LP.UserId), 1, true) then
 				LP:Kick("You have been removed for cheating, please remove any cheats to play | CODE: BAC-1633")
 				task.wait(999999)
 			end
@@ -1962,8 +1980,7 @@ local function createMobilePanel()
 	local gui = Instance.new("ScreenGui")
 	gui.Name = "CursedHubMobile"
 	gui.ResetOnSpawn = false
-	pcall(function() gui.Parent = game:GetService("CoreGui") end)
-	if not gui.Parent then gui.Parent = LP:WaitForChild("PlayerGui") end
+	safeParentGui(gui)
 
 	local function createButton(text, isToggle, callback, initialActive, defaultPos, id)
 		local container = Instance.new("Frame")
@@ -2153,8 +2170,7 @@ local function buildGui()
 	local pg=LP:FindFirstChild("PlayerGui");if pg then local o=pg:FindFirstChild("CursedHub");if o then o:Destroy() end end
 	local gui=Instance.new("ScreenGui")
 	gui.Name="CursedHub";gui.ResetOnSpawn=false;gui.DisplayOrder=10;gui.IgnoreGuiInset=true
-	pcall(function() if syn and syn.protect_gui then syn.protect_gui(gui) end end)
-	if not pcall(function() gui.Parent=game:GetService("CoreGui") end) then gui.Parent=LP:WaitForChild("PlayerGui") end
+	safeParentGui(gui)
 	local main=Instance.new("Frame",gui)
 	main.Size=UDim2.new(0,300,0,460);main.Position=UDim2.new(0,20,0,20)
 	main.BackgroundColor3=BG;main.BorderSizePixel=0;main.ClipsDescendants=false
