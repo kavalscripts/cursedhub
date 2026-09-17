@@ -1,3 +1,12 @@
+repeat task.wait() until game:IsLoaded()
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local TS = game:GetService("TweenService")
+local Lighting = game:GetService("Lighting")
+local HS = game:GetService("HttpService")
+local LP = Players.LocalPlayer
+
 local bodyLockEnabled = false
 local bodyLockRadius = 60
 local setBodyLockVisual = nil
@@ -55,9 +64,7 @@ local function safeParentGui(guiObj)
 	end
 end
 
-repeat task.wait() until game:IsLoaded()
-local Players,RunService,UIS,TS,Lighting,HS = game:GetService("Players"),game:GetService("RunService"),game:GetService("UserInputService"),game:GetService("TweenService"),game:GetService("Lighting"),game:GetService("HttpService")
-local LP = Players.LocalPlayer
+
 local NS,CS = 60,30
 local LAGGER_SPEED = 15
 local LAGGER_CARRY_SPEED = 24.5
